@@ -1,0 +1,47 @@
+# Rust/Cargo
+/target
+**/*.rs.bk
+*.pdb
+# Note: Cargo.lock IS committed for binary crates (applications)
+
+# Test files
+*.xlsx
+*.xls
+*.xlsm
+*.xlsb
+*.ods
+*.csv
+
+# macOS
+.DS_Store
+.AppleDouble
+.LSOverride
+
+# Linux
+*~
+.nfs*
+
+# Windows
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+
+# IDEs
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.project
+.classpath
+.settings/
+
+# R (legacy from user's setup)
+.Rhistory
+.RData
+.Rproj.user
+
+# Backup files
+*.bak
+*.tmp
+*.old
