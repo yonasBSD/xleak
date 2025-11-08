@@ -139,6 +139,10 @@ xleak is optimized for both small and large files:
 | pandas | ✅ Many | ❌ Slow | ❌ Python required | ❌ No | ❌ No | ❌ No |
 | csvlook | ❌ CSV only | ✅ Fast | ✅ Yes | ❌ No | ❌ No | ❌ No |
 
+## Related Projects
+
+Looking to view Word documents in the terminal? Check out **[doxx](https://github.com/bgreenwell/doxx)** - a terminal viewer for `.docx` files with similar TUI capabilities.
+
 ## Built With
 
 - **Rust** - for performance and reliability
