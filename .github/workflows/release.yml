@@ -148,7 +148,7 @@ jobs:
   publish-cargo:
     name: Publish to crates.io
     runs-on: ubuntu-latest
-    if: ${{ github.actor == 'greenwbm' && !contains(github.ref_name, '-') }}
+    if: ${{ github.actor == 'bgreenwell' && !contains(github.ref_name, '-') }}
     needs: [create-release]
 
     steps:
