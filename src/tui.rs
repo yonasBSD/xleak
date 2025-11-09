@@ -104,8 +104,8 @@ impl SheetDataSource {
             SheetDataSource::Lazy { .. } => {
                 // For lazy loading, get just the one row we need
                 let (rows, formulas) = self.get_rows(row, 1);
-                let cell = rows.get(0).and_then(|r| r.get(col)).cloned();
-                let formula = formulas.get(0).and_then(|r| r.get(col)).and_then(|f| f.clone());
+                let cell = rows.first().and_then(|r| r.get(col)).cloned();
+                let formula = formulas.first().and_then(|r| r.get(col)).and_then(|f| f.clone());
                 (cell, formula)
             }
         }
@@ -145,7 +145,7 @@ impl ProgressInfo {
 
     fn format(&self) -> String {
         let pct = self.percentage();
-        let elapsed = self.started_at.elapsed().as_secs_f64();
+        let _elapsed = self.started_at.elapsed().as_secs_f64();
         format!("{} {}% ({}/{})", self.message, pct, self.current, self.total)
     }
 }
@@ -516,8 +516,7 @@ impl TuiState {
     /// Copy the current row to clipboard (tab-separated)
     fn copy_current_row(&mut self) {
         let (rows, _formulas) = self.sheet_data.get_rows(self.cursor_row, 1);
-        let row_values = rows
-            .get(0)
+        let row_values = rows.first()
             .map(|row| {
                 row.iter()
                     .map(|cell| {

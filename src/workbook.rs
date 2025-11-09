@@ -151,6 +151,7 @@ impl LazySheetData {
     }
 
     /// Convert to eager SheetData (loads everything)
+    #[allow(clippy::wrong_self_convention)]
     pub fn to_sheet_data(self) -> SheetData {
         SheetData::from_range_with_formulas(self.range, self.formula_range)
     }
@@ -169,6 +170,7 @@ pub enum CellValue {
 
 /// Cell value with optional formula
 #[derive(Debug, Clone)]
+#[allow(dead_code)]
 pub struct CellValueWithFormula {
     pub value: CellValue,
     pub formula: Option<String>,
@@ -176,6 +178,7 @@ pub struct CellValueWithFormula {
 
 impl CellValue {
     /// Attach a formula to this cell value
+    #[allow(dead_code)]
     pub fn with_formula(self, formula: Option<String>) -> CellValueWithFormula {
         CellValueWithFormula {
             value: self,
@@ -317,6 +320,7 @@ impl std::fmt::Display for CellValue {
 }
 
 impl SheetData {
+    #[allow(dead_code)]
     pub fn from_range(range: Range<Data>) -> Self {
         Self::from_range_with_formulas(range, None)
     }
@@ -522,9 +526,7 @@ mod tests {
     #[test]
     fn test_workbook_open_real_file() {
         // Test with actual test file if it exists
-        let result = Workbook::open("test_data.xlsx");
-        if result.is_ok() {
-            let mut wb = result.unwrap();
+        if let Ok(wb) = Workbook::open("tests/fixtures/test_data.xlsx") {
             let sheet_names = wb.sheet_names();
             assert!(!sheet_names.is_empty(), "Should have at least one sheet");
         }

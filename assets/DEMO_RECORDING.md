@@ -42,13 +42,13 @@ Here's a suggested demo flow showcasing xleak's key features:
 
 1. **Launch interactive mode**
    ```bash
-   xleak test_data.xlsx -i
+   xleak tests/fixtures/test_data.xlsx -i
    ```
 
 2. **Navigate cells** (arrow keys for 2-3 seconds)
 
 3. **Search feature** (`/`)
-   - Type: `Engineering`
+   - Type: `Widgets`
    - Press Enter
    - Press `n` to jump to next match
 
@@ -72,17 +72,17 @@ Here's a suggested demo flow showcasing xleak's key features:
 
 ## VHS Tape File
 
-Create `demo.tape`:
+Create `assets/demo.tape`:
 
 ```tape
-Output demo.gif
+Output assets/demo.gif
 
-Set FontSize 14
+Set FontSize 18
 Set Width 1200
 Set Height 700
 Set Theme "Dracula"
 
-Type "xleak test_data.xlsx -i"
+Type "xleak tests/fixtures/test_data.xlsx -i"
 Enter
 Sleep 2s
 
@@ -94,7 +94,7 @@ Sleep 1s
 # Search
 Type "/"
 Sleep 500ms
-Type "Engineering"
+Type "Widgets"
 Enter
 Sleep 1s
 Type "n"
@@ -126,7 +126,7 @@ Sleep 1s
 
 Run with:
 ```bash
-vhs demo.tape
+vhs assets/demo.tape
 ```
 
 ## Manual Recording Tips
@@ -139,7 +139,7 @@ If recording manually:
    - Use a clean theme (light or dark with good contrast)
 
 2. **File to demo:**
-   - Use `test_data.xlsx` (has multiple sheets, formulas, variety of data)
+   - Use `tests/fixtures/test_data.xlsx` (has multiple sheets, formulas, variety of data)
 
 3. **Keep it short:**
    - Aim for 20-30 seconds
@@ -159,22 +159,17 @@ After creating the GIF:
 ```bash
 # Optimize with gifsicle (optional)
 brew install gifsicle
-gifsicle -O3 --colors 256 demo.gif -o demo-optimized.gif
+gifsicle -O3 --colors 256 assets/demo.gif -o assets/demo-optimized.gif
 
 # Or use online tool: https://ezgif.com/optimize
 ```
 
 ## Adding to README
 
-Once created, add to README:
+The demo gif is already referenced in README.md:
 
 ```markdown
-## Demo
-
-![xleak demo](demo.gif)
-
-Or upload to GitHub releases and link:
-
-```markdown
-![xleak demo](https://github.com/greenwbm/xleak/releases/download/v0.1.0/demo.gif)
+![xleak demo](assets/demo.gif)
 ```
+
+Alternatively, upload to GitHub releases and link it there.

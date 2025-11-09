@@ -1,6 +1,6 @@
-Output demo.gif
+Output assets/demo.gif
 
-Set FontSize 14
+Set FontSize 18
 Set Width 1200
 Set Height 700
 Set Theme "Dracula"
@@ -8,7 +8,7 @@ Set TypingSpeed 100ms
 Set PlaybackSpeed 1.0
 
 # Launch xleak in interactive mode
-Type "xleak test_data.xlsx -i"
+Type "xleak tests/fixtures/test_data.xlsx -i"
 Enter
 Sleep 3s
 
@@ -20,10 +20,10 @@ Sleep 500ms
 Down 2
 Sleep 1s
 
-# Search for "Engineering"
+# Search for "Widgets"
 Type "/"
 Sleep 300ms
-Type "Engineering"
+Type "Widgets"
 Sleep 500ms
 Enter
 Sleep 1.5s

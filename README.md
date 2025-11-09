@@ -4,6 +4,8 @@
 
 Inspired by [doxx](https://github.com/bgreenwell/doxx), `xleak` brings Excel spreadsheets to your command line with beautiful rendering, powerful export capabilities, and a feature-rich interactive TUI.
 
+![xleak demo](assets/demo.gif)
+
 ## Features
 
 ### Core Functionality
