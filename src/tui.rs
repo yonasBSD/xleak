@@ -56,13 +56,21 @@ impl SheetDataSource {
     }
 
     /// Get rows for rendering (handles caching for lazy loading)
-    fn get_rows(&mut self, start: usize, count: usize) -> (&[Vec<CellValue>], &[Vec<Option<String>>]) {
+    fn get_rows(
+        &mut self,
+        start: usize,
+        count: usize,
+    ) -> (&[Vec<CellValue>], &[Vec<Option<String>>]) {
         match self {
             SheetDataSource::Eager(data) => {
                 let end = (start + count).min(data.rows.len());
                 (&data.rows[start..end], &data.formulas[start..end])
             }
-            SheetDataSource::Lazy { data, cache, cache_size } => {
+            SheetDataSource::Lazy {
+                data,
+                cache,
+                cache_size,
+            } => {
                 // Check if we need to reload the cache
                 let needs_reload = match cache {
                     None => true,
@@ -98,14 +106,21 @@ impl SheetDataSource {
         match self {
             SheetDataSource::Eager(data) => {
                 let cell = data.rows.get(row).and_then(|r| r.get(col)).cloned();
-                let formula = data.formulas.get(row).and_then(|r| r.get(col)).and_then(|f| f.clone());
+                let formula = data
+                    .formulas
+                    .get(row)
+                    .and_then(|r| r.get(col))
+                    .and_then(|f| f.clone());
                 (cell, formula)
             }
             SheetDataSource::Lazy { .. } => {
                 // For lazy loading, get just the one row we need
                 let (rows, formulas) = self.get_rows(row, 1);
                 let cell = rows.first().and_then(|r| r.get(col)).cloned();
-                let formula = formulas.first().and_then(|r| r.get(col)).and_then(|f| f.clone());
+                let formula = formulas
+                    .first()
+                    .and_then(|r| r.get(col))
+                    .and_then(|f| f.clone());
                 (cell, formula)
             }
         }
@@ -146,7 +161,10 @@ impl ProgressInfo {
     fn format(&self) -> String {
         let pct = self.percentage();
         let _elapsed = self.started_at.elapsed().as_secs_f64();
-        format!("{} {}% ({}/{})", self.message, pct, self.current, self.total)
+        format!(
+            "{} {}% ({}/{})",
+            self.message, pct, self.current, self.total
+        )
     }
 }
 
@@ -157,10 +175,10 @@ pub struct TuiState {
     current_sheet_index: usize,
     sheet_data: SheetDataSource,
     should_quit: bool,
-    cursor_row: usize,    // Current row (0-indexed in data)
-    cursor_col: usize,    // Current column (0-indexed)
-    scroll_offset: usize, // Vertical scroll offset
-    show_help: bool,      // Help overlay visible
+    cursor_row: usize,      // Current row (0-indexed in data)
+    cursor_col: usize,      // Current column (0-indexed)
+    scroll_offset: usize,   // Vertical scroll offset
+    show_help: bool,        // Help overlay visible
     show_cell_detail: bool, // Cell detail popup visible
     // Search state
     search_mode: bool,                   // Whether we're in search input mode
@@ -168,8 +186,8 @@ pub struct TuiState {
     search_matches: Vec<(usize, usize)>, // List of (row, col) matches
     current_match_index: Option<usize>,  // Index in search_matches
     // Jump mode state
-    jump_mode: bool,       // Whether we're in jump input mode
-    jump_input: String,    // Current jump input (row number or cell address)
+    jump_mode: bool,    // Whether we're in jump input mode
+    jump_input: String, // Current jump input (row number or cell address)
     // Clipboard state
     copy_feedback: Option<(String, Instant)>, // Message and timestamp for copy feedback
     // Progress state
@@ -193,7 +211,10 @@ impl TuiState {
 
         // Choose loading strategy based on size
         let sheet_data = if sheet_height > Self::LAZY_LOADING_THRESHOLD {
-            eprintln!("📊 Large file detected ({} rows) - using lazy loading", sheet_height);
+            eprintln!(
+                "📊 Large file detected ({} rows) - using lazy loading",
+                sheet_height
+            );
             SheetDataSource::Lazy {
                 data: lazy_data,
                 cache: None,
@@ -267,7 +288,10 @@ impl TuiState {
 
         // Choose loading strategy based on size
         self.sheet_data = if sheet_height > Self::LAZY_LOADING_THRESHOLD {
-            eprintln!("📊 Large file detected ({} rows) - using lazy loading", sheet_height);
+            eprintln!(
+                "📊 Large file detected ({} rows) - using lazy loading",
+                sheet_height
+            );
             SheetDataSource::Lazy {
                 data: lazy_data,
                 cache: None,
@@ -408,14 +432,15 @@ impl TuiState {
         if let Ok(row_num) = input.parse::<usize>() {
             if row_num > 0 && row_num <= self.sheet_data.height() {
                 self.cursor_row = row_num - 1; // Convert to 0-indexed
-                self.copy_feedback = Some((
-                    format!("Jumped to row {}", row_num),
-                    Instant::now()
-                ));
+                self.copy_feedback = Some((format!("Jumped to row {}", row_num), Instant::now()));
             } else {
                 self.copy_feedback = Some((
-                    format!("Invalid row: {} (max: {})", row_num, self.sheet_data.height()),
-                    Instant::now()
+                    format!(
+                        "Invalid row: {} (max: {})",
+                        row_num,
+                        self.sheet_data.height()
+                    ),
+                    Instant::now(),
                 ));
             }
         }
@@ -426,41 +451,45 @@ impl TuiState {
                 self.cursor_col = col;
                 self.copy_feedback = Some((
                     format!("Jumped to {}", input.to_uppercase()),
-                    Instant::now()
+                    Instant::now(),
                 ));
             } else {
                 self.copy_feedback = Some((
                     format!("Cell address out of bounds: {}", input),
-                    Instant::now()
+                    Instant::now(),
                 ));
             }
         }
         // Try to parse as "row,col" format
         else if let Some((row, col)) = input.split_once(',') {
-            if let (Ok(row_num), Ok(col_num)) = (row.trim().parse::<usize>(), col.trim().parse::<usize>()) {
-                if row_num > 0 && row_num <= self.sheet_data.height() && col_num > 0 && col_num <= self.sheet_data.width() {
+            if let (Ok(row_num), Ok(col_num)) =
+                (row.trim().parse::<usize>(), col.trim().parse::<usize>())
+            {
+                if row_num > 0
+                    && row_num <= self.sheet_data.height()
+                    && col_num > 0
+                    && col_num <= self.sheet_data.width()
+                {
                     self.cursor_row = row_num - 1;
                     self.cursor_col = col_num - 1;
                     self.copy_feedback = Some((
                         format!("Jumped to row {}, col {}", row_num, col_num),
-                        Instant::now()
+                        Instant::now(),
                     ));
                 } else {
-                    self.copy_feedback = Some((
-                        "Invalid row/column number".to_string(),
-                        Instant::now()
-                    ));
+                    self.copy_feedback =
+                        Some(("Invalid row/column number".to_string(), Instant::now()));
                 }
             } else {
                 self.copy_feedback = Some((
                     "Invalid format. Use: row number, cell (A5), or row,col".to_string(),
-                    Instant::now()
+                    Instant::now(),
                 ));
             }
         } else {
             self.copy_feedback = Some((
                 "Invalid format. Use: row number, cell (A5), or row,col".to_string(),
-                Instant::now()
+                Instant::now(),
             ));
         }
 
@@ -516,7 +545,8 @@ impl TuiState {
     /// Copy the current row to clipboard (tab-separated)
     fn copy_current_row(&mut self) {
         let (rows, _formulas) = self.sheet_data.get_rows(self.cursor_row, 1);
-        let row_values = rows.first()
+        let row_values = rows
+            .first()
             .map(|row| {
                 row.iter()
                     .map(|cell| {
@@ -831,7 +861,8 @@ impl TuiState {
         let header = Row::new(header_cells).height(1);
 
         // Get visible rows from data source (handles lazy loading if needed)
-        let (visible_rows, _visible_formulas) = self.sheet_data.get_rows(visible_start, table_height);
+        let (visible_rows, _visible_formulas) =
+            self.sheet_data.get_rows(visible_start, table_height);
 
         let data_rows: Vec<Row> = visible_rows
             .iter()
@@ -917,7 +948,10 @@ impl TuiState {
             // Show progress indicator
             format!(" ⏳ {} ", progress.format())
         } else if self.jump_mode {
-            format!(" Jump to (row, cell like A5, or row,col): {} ", self.jump_input)
+            format!(
+                " Jump to (row, cell like A5, or row,col): {} ",
+                self.jump_input
+            )
         } else if self.search_mode {
             format!(" Search: {} ", self.search_query)
         } else if let Some(idx) = self.current_match_index {
@@ -1239,18 +1273,31 @@ impl TuiState {
         let (cell_value, cell_formula) = self.sheet_data.get_cell(self.cursor_row, self.cursor_col);
 
         let cell_addr = self.current_cell_address();
-        let header = self.sheet_data.headers().get(self.cursor_col)
+        let header = self
+            .sheet_data
+            .headers()
+            .get(self.cursor_col)
             .map(|s| s.as_str())
             .unwrap_or("");
 
         // Build detail lines
         let mut detail_lines = vec![
             Line::from(vec![
-                Span::styled("Cell: ", Style::default().fg(Color::Yellow).add_modifier(Modifier::BOLD)),
+                Span::styled(
+                    "Cell: ",
+                    Style::default()
+                        .fg(Color::Yellow)
+                        .add_modifier(Modifier::BOLD),
+                ),
                 Span::styled(cell_addr.clone(), Style::default().fg(Color::Cyan)),
             ]),
             Line::from(vec![
-                Span::styled("Column: ", Style::default().fg(Color::Yellow).add_modifier(Modifier::BOLD)),
+                Span::styled(
+                    "Column: ",
+                    Style::default()
+                        .fg(Color::Yellow)
+                        .add_modifier(Modifier::BOLD),
+                ),
                 Span::raw(header),
             ]),
             Line::from(""),
@@ -1259,8 +1306,18 @@ impl TuiState {
         // Show formula first if it exists (more important than type)
         if let Some(ref formula) = cell_formula {
             detail_lines.push(Line::from(vec![
-                Span::styled("Formula: ", Style::default().fg(Color::Yellow).add_modifier(Modifier::BOLD)),
-                Span::styled(formula.clone(), Style::default().fg(Color::Magenta).add_modifier(Modifier::BOLD)),
+                Span::styled(
+                    "Formula: ",
+                    Style::default()
+                        .fg(Color::Yellow)
+                        .add_modifier(Modifier::BOLD),
+                ),
+                Span::styled(
+                    formula.clone(),
+                    Style::default()
+                        .fg(Color::Magenta)
+                        .add_modifier(Modifier::BOLD),
+                ),
             ]));
             detail_lines.push(Line::from(""));
         }
@@ -1278,7 +1335,12 @@ impl TuiState {
             };
 
             detail_lines.push(Line::from(vec![
-                Span::styled("Type: ", Style::default().fg(Color::Yellow).add_modifier(Modifier::BOLD)),
+                Span::styled(
+                    "Type: ",
+                    Style::default()
+                        .fg(Color::Yellow)
+                        .add_modifier(Modifier::BOLD),
+                ),
                 Span::styled(cell_type, Style::default().fg(Color::Green)),
             ]));
 
@@ -1288,8 +1350,18 @@ impl TuiState {
             // If cell is empty but has a formula, add explanation
             if raw_value.is_empty() && cell_formula.is_some() {
                 detail_lines.push(Line::from(vec![
-                    Span::styled("Value: ", Style::default().fg(Color::Yellow).add_modifier(Modifier::BOLD)),
-                    Span::styled("(empty - formula not evaluated)", Style::default().fg(Color::DarkGray).add_modifier(Modifier::ITALIC)),
+                    Span::styled(
+                        "Value: ",
+                        Style::default()
+                            .fg(Color::Yellow)
+                            .add_modifier(Modifier::BOLD),
+                    ),
+                    Span::styled(
+                        "(empty - formula not evaluated)",
+                        Style::default()
+                            .fg(Color::DarkGray)
+                            .add_modifier(Modifier::ITALIC),
+                    ),
                 ]));
             } else {
                 let value_display = if raw_value.is_empty() {
@@ -1298,7 +1370,12 @@ impl TuiState {
                     raw_value.clone()
                 };
                 detail_lines.push(Line::from(vec![
-                    Span::styled("Value: ", Style::default().fg(Color::Yellow).add_modifier(Modifier::BOLD)),
+                    Span::styled(
+                        "Value: ",
+                        Style::default()
+                            .fg(Color::Yellow)
+                            .add_modifier(Modifier::BOLD),
+                    ),
                     Span::raw(value_display),
                 ]));
             }
@@ -1307,7 +1384,12 @@ impl TuiState {
             let display_value = cell.to_string();
             if display_value != raw_value {
                 detail_lines.push(Line::from(vec![
-                    Span::styled("Display Value: ", Style::default().fg(Color::Yellow).add_modifier(Modifier::BOLD)),
+                    Span::styled(
+                        "Display Value: ",
+                        Style::default()
+                            .fg(Color::Yellow)
+                            .add_modifier(Modifier::BOLD),
+                    ),
                     Span::raw(display_value.clone()),
                 ]));
             }
@@ -1315,7 +1397,9 @@ impl TuiState {
             detail_lines.push(Line::from(""));
             detail_lines.push(Line::from(Span::styled(
                 "Full Content:",
-                Style::default().fg(Color::Yellow).add_modifier(Modifier::BOLD),
+                Style::default()
+                    .fg(Color::Yellow)
+                    .add_modifier(Modifier::BOLD),
             )));
             detail_lines.push(Line::from(""));
 
@@ -1327,13 +1411,25 @@ impl TuiState {
             // No cell value - might be a formula cell or truly empty
             if cell_formula.is_some() {
                 detail_lines.push(Line::from(vec![
-                    Span::styled("Value: ", Style::default().fg(Color::Yellow).add_modifier(Modifier::BOLD)),
-                    Span::styled("(formula not evaluated by Excel reader)", Style::default().fg(Color::DarkGray).add_modifier(Modifier::ITALIC)),
+                    Span::styled(
+                        "Value: ",
+                        Style::default()
+                            .fg(Color::Yellow)
+                            .add_modifier(Modifier::BOLD),
+                    ),
+                    Span::styled(
+                        "(formula not evaluated by Excel reader)",
+                        Style::default()
+                            .fg(Color::DarkGray)
+                            .add_modifier(Modifier::ITALIC),
+                    ),
                 ]));
             } else {
                 detail_lines.push(Line::from(Span::styled(
                     "No cell data",
-                    Style::default().fg(Color::DarkGray).add_modifier(Modifier::ITALIC),
+                    Style::default()
+                        .fg(Color::DarkGray)
+                        .add_modifier(Modifier::ITALIC),
                 )));
             }
         }
@@ -1341,13 +1437,16 @@ impl TuiState {
         detail_lines.push(Line::from(""));
         detail_lines.push(Line::from(vec![Span::styled(
             "Press any key to close",
-            Style::default().fg(Color::Magenta).add_modifier(Modifier::ITALIC),
+            Style::default()
+                .fg(Color::Magenta)
+                .add_modifier(Modifier::ITALIC),
         )]));
 
         // Calculate popup size (60% width, auto height)
         let area = frame.area();
         let popup_width = (area.width as f32 * 0.6).min(80.0) as u16;
-        let popup_height = (detail_lines.len() + 4).min(area.height.saturating_sub(2) as usize) as u16;
+        let popup_height =
+            (detail_lines.len() + 4).min(area.height.saturating_sub(2) as usize) as u16;
 
         let popup_area = Rect {
             x: (area.width.saturating_sub(popup_width)) / 2,
@@ -1379,11 +1478,7 @@ impl TuiState {
                                 .add_modifier(Modifier::BOLD),
                         ),
                         Span::raw(" - "),
-                        Span::styled(
-                            cell_addr,
-                            Style::default()
-                                .fg(Color::Cyan),
-                        ),
+                        Span::styled(cell_addr, Style::default().fg(Color::Cyan)),
                         Span::raw(" "),
                     ])
                     .title_alignment(Alignment::Center),

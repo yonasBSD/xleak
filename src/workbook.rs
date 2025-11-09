@@ -43,7 +43,10 @@ impl Workbook {
         // Try to load formulas, but don't fail if they're not available
         let formula_range = self.sheets.worksheet_formula(name).ok();
 
-        Ok(LazySheetData::from_range_with_formulas(range, formula_range))
+        Ok(LazySheetData::from_range_with_formulas(
+            range,
+            formula_range,
+        ))
     }
 }
 
@@ -95,13 +98,18 @@ impl LazySheetData {
     }
 
     /// Load a specific range of rows on demand (zero-indexed, header not included)
-    pub fn get_rows(&self, start: usize, count: usize) -> (Vec<Vec<CellValue>>, Vec<Vec<Option<String>>>) {
+    pub fn get_rows(
+        &self,
+        start: usize,
+        count: usize,
+    ) -> (Vec<Vec<CellValue>>, Vec<Vec<Option<String>>>) {
         let end = (start + count).min(self.height);
 
         // Extract requested rows (skip header + start rows, take count)
-        let rows: Vec<Vec<CellValue>> = self.range
+        let rows: Vec<Vec<CellValue>> = self
+            .range
             .rows()
-            .skip(1 + start)  // Skip header + start offset
+            .skip(1 + start) // Skip header + start offset
             .take(end - start)
             .map(|row| row.iter().map(SheetData::datatype_to_cellvalue).collect())
             .collect();
@@ -223,7 +231,13 @@ impl CellValue {
                 if time_fraction.abs() < 0.0000001 {
                     format!("{}", date.format("%Y-%m-%d"))
                 } else {
-                    format!("{} {:02}:{:02}:{:02}", date.format("%Y-%m-%d"), hours, minutes, seconds)
+                    format!(
+                        "{} {:02}:{:02}:{:02}",
+                        date.format("%Y-%m-%d"),
+                        hours,
+                        minutes,
+                        seconds
+                    )
                 }
             }
         }
@@ -355,14 +369,14 @@ impl SheetData {
             let formula_start = formula_range.start().unwrap_or((0, 0));
 
             // Create empty formula structure matching data dimensions
-            let mut formula_grid: Vec<Vec<Option<String>>> =
-                vec![vec![None; width]; height];
+            let mut formula_grid: Vec<Vec<Option<String>>> = vec![vec![None; width]; height];
 
             // Populate formulas at their absolute positions
             for (row_offset, formula_row) in formula_range.rows().enumerate() {
                 let absolute_row = formula_start.0 as usize + row_offset;
-                if absolute_row > 0 && absolute_row <= height {  // Skip header row (row 0)
-                    let data_row_idx = absolute_row - 1;  // Convert to 0-based data row index
+                if absolute_row > 0 && absolute_row <= height {
+                    // Skip header row (row 0)
+                    let data_row_idx = absolute_row - 1; // Convert to 0-based data row index
                     for (col_offset, formula_str) in formula_row.iter().enumerate() {
                         let absolute_col = formula_start.1 as usize + col_offset;
                         if absolute_col < width && !formula_str.is_empty() {
@@ -374,7 +388,10 @@ impl SheetData {
 
             // Return formula grid matching data rows
             // We already handled header row when populating, so just take the data rows
-            formula_grid.into_iter().take(height.saturating_sub(1)).collect()
+            formula_grid
+                .into_iter()
+                .take(height.saturating_sub(1))
+                .collect()
         } else {
             // No formulas available, create empty parallel structure
             vec![vec![None; width]; height.saturating_sub(1)]

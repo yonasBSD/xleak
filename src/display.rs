@@ -89,7 +89,8 @@ pub fn display_table(
                     data.formulas
                         .get(row_idx)
                         .and_then(|formula_row| formula_row.get(col_idx))
-                        .and_then(|f| f.as_ref()).cloned()
+                        .and_then(|f| f.as_ref())
+                        .cloned()
                         .unwrap_or_else(|| cell.to_string())
                 } else {
                     cell.to_string()
