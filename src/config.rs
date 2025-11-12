@@ -346,4 +346,239 @@ mod tests {
             Some((KeyCode::Char('j'), KeyModifiers::empty()))
         );
     }
+
+    // =========================================================================
+    // TOML Parsing Tests (Cross-Platform Line Endings)
+    // =========================================================================
+
+    #[test]
+    fn test_toml_parsing_unix_line_endings() {
+        let config_str = "[theme]\ndefault = \"Dracula\"\n\n[ui]\nmax_rows = 100\n\n[keybindings]\nprofile = \"vim\"";
+        let config: Config = toml::from_str(config_str).expect("Failed to parse TOML");
+        assert_eq!(config.theme.default, "Dracula");
+        assert_eq!(config.ui.max_rows, 100);
+        assert_eq!(config.keybindings.profile, "vim");
+    }
+
+    #[test]
+    fn test_toml_parsing_windows_line_endings() {
+        let config_str = "[theme]\r\ndefault = \"Nord\"\r\n\r\n[ui]\r\nmax_rows = 200\r\n\r\n[keybindings]\r\nprofile = \"default\"";
+        let config: Config = toml::from_str(config_str).expect("Failed to parse TOML");
+        assert_eq!(config.theme.default, "Nord");
+        assert_eq!(config.ui.max_rows, 200);
+        assert_eq!(config.keybindings.profile, "default");
+    }
+
+    #[test]
+    fn test_toml_parsing_mixed_line_endings() {
+        let config_str = "[theme]\r\ndefault = \"GitHub Dark\"\n\n[ui]\r\nmax_rows = 75\n[keybindings]\r\nprofile = \"vim\"";
+        let config: Config = toml::from_str(config_str).expect("Failed to parse TOML");
+        assert_eq!(config.theme.default, "GitHub Dark");
+        assert_eq!(config.ui.max_rows, 75);
+        assert_eq!(config.keybindings.profile, "vim");
+    }
+
+    // =========================================================================
+    // Theme Name Tests (Case Sensitivity)
+    // =========================================================================
+
+    #[test]
+    fn test_theme_name_case_insensitive() {
+        // Theme config parsing stores the string as-is
+        // TuiState::parse_theme_name handles case-insensitive matching
+        let config_str = "[theme]\ndefault = \"dracula\"";
+        let config: Config = toml::from_str(config_str).unwrap();
+        assert_eq!(config.theme.default, "dracula");
+
+        let config_str = "[theme]\ndefault = \"DRACULA\"";
+        let config: Config = toml::from_str(config_str).unwrap();
+        assert_eq!(config.theme.default, "DRACULA");
+
+        let config_str = "[theme]\ndefault = \"Dracula\"";
+        let config: Config = toml::from_str(config_str).unwrap();
+        assert_eq!(config.theme.default, "Dracula");
+    }
+
+    #[test]
+    fn test_theme_name_with_spaces() {
+        let config_str = "[theme]\ndefault = \"Solarized Dark\"";
+        let config: Config = toml::from_str(config_str).unwrap();
+        assert_eq!(config.theme.default, "Solarized Dark");
+
+        let config_str = "[theme]\ndefault = \"GitHub Dark\"";
+        let config: Config = toml::from_str(config_str).unwrap();
+        assert_eq!(config.theme.default, "GitHub Dark");
+    }
+
+    #[test]
+    fn test_invalid_theme_stored_as_is() {
+        // Config stores the theme name as-is; TuiState handles fallback to Default
+        let config_str = "[theme]\ndefault = \"NonexistentTheme\"";
+        let config: Config = toml::from_str(config_str).unwrap();
+        assert_eq!(config.theme.default, "NonexistentTheme");
+    }
+
+    // =========================================================================
+    // Keybinding Override Tests
+    // =========================================================================
+
+    #[test]
+    fn test_custom_keybindings_override_profile() {
+        let config_str = r#"
+[keybindings]
+profile = "default"
+
+[keybindings.custom]
+quit = "x"
+search = "?"
+"#;
+        let config: Config = toml::from_str(config_str).unwrap();
+
+        // Custom binding should override
+        assert_eq!(
+            config.get_keybinding("quit"),
+            Some((KeyCode::Char('x'), KeyModifiers::empty()))
+        );
+        assert_eq!(
+            config.get_keybinding("search"),
+            Some((KeyCode::Char('?'), KeyModifiers::empty()))
+        );
+
+        // Non-overridden should use profile default
+        assert_eq!(
+            config.get_keybinding("help"),
+            Some((KeyCode::Char('?'), KeyModifiers::empty()))
+        );
+    }
+
+    #[test]
+    fn test_vim_profile_with_custom_overrides() {
+        let config_str = r#"
+[keybindings]
+profile = "vim"
+
+[keybindings.custom]
+quit = "x"
+page_up = "Ctrl+b"
+"#;
+        let config: Config = toml::from_str(config_str).unwrap();
+
+        // Custom overrides
+        assert_eq!(
+            config.get_keybinding("quit"),
+            Some((KeyCode::Char('x'), KeyModifiers::empty()))
+        );
+        assert_eq!(
+            config.get_keybinding("page_up"),
+            Some((KeyCode::Char('b'), KeyModifiers::CONTROL))
+        );
+
+        // VIM profile bindings (not overridden)
+        assert_eq!(
+            config.get_keybinding("up"),
+            Some((KeyCode::Char('k'), KeyModifiers::empty()))
+        );
+        assert_eq!(
+            config.get_keybinding("down"),
+            Some((KeyCode::Char('j'), KeyModifiers::empty()))
+        );
+    }
+
+    #[test]
+    fn test_get_keybinding_returns_none_for_unknown_action() {
+        let config = Config::default();
+        assert_eq!(config.get_keybinding("nonexistent_action"), None);
+        assert_eq!(config.get_keybinding(""), None);
+        assert_eq!(config.get_keybinding("random_string_12345"), None);
+    }
+
+    // =========================================================================
+    // Key Parsing Edge Cases
+    // =========================================================================
+
+    #[test]
+    fn test_parse_key_multiple_modifiers() {
+        // Note: crossterm doesn't support more than 2 modifiers simultaneously,
+        // but we should parse them correctly
+        assert_eq!(
+            parse_key_string("Ctrl+Shift+Tab"),
+            Some((
+                KeyCode::Tab,
+                KeyModifiers::CONTROL | KeyModifiers::SHIFT
+            ))
+        );
+
+        assert_eq!(
+            parse_key_string("Ctrl+Alt+g"),
+            Some((
+                KeyCode::Char('g'),
+                KeyModifiers::CONTROL | KeyModifiers::ALT
+            ))
+        );
+    }
+
+    #[test]
+    fn test_parse_key_case_insensitive_modifiers() {
+        assert_eq!(
+            parse_key_string("ctrl+g"),
+            Some((KeyCode::Char('g'), KeyModifiers::CONTROL))
+        );
+        assert_eq!(
+            parse_key_string("CTRL+g"),
+            Some((KeyCode::Char('g'), KeyModifiers::CONTROL))
+        );
+        assert_eq!(
+            parse_key_string("Ctrl+g"),
+            Some((KeyCode::Char('g'), KeyModifiers::CONTROL))
+        );
+
+        assert_eq!(
+            parse_key_string("shift+tab"),
+            Some((KeyCode::Tab, KeyModifiers::SHIFT))
+        );
+        assert_eq!(
+            parse_key_string("SHIFT+TAB"),
+            Some((KeyCode::Tab, KeyModifiers::SHIFT))
+        );
+    }
+
+    #[test]
+    fn test_parse_key_invalid_strings() {
+        assert_eq!(parse_key_string(""), None);
+        assert_eq!(parse_key_string("InvalidKey"), None);
+        assert_eq!(parse_key_string("Ctrl+"), None);
+        assert_eq!(parse_key_string("+g"), None);
+        assert_eq!(parse_key_string("Ctrl+InvalidKey"), None);
+        assert_eq!(parse_key_string("Unknown+g"), None);
+    }
+
+    // =========================================================================
+    // Profile Behavior Tests
+    // =========================================================================
+
+    #[test]
+    fn test_vim_profile_falls_back_to_default() {
+        let config_str = "[keybindings]\nprofile = \"vim\"";
+        let config: Config = toml::from_str(config_str).unwrap();
+
+        // VIM-specific bindings
+        assert_eq!(
+            config.get_keybinding("up"),
+            Some((KeyCode::Char('k'), KeyModifiers::empty()))
+        );
+
+        // Non-VIM actions should fall back to default profile
+        assert_eq!(
+            config.get_keybinding("help"),
+            Some((KeyCode::Char('?'), KeyModifiers::empty()))
+        );
+        assert_eq!(
+            config.get_keybinding("theme_toggle"),
+            Some((KeyCode::Char('t'), KeyModifiers::empty()))
+        );
+        assert_eq!(
+            config.get_keybinding("search"),
+            Some((KeyCode::Char('/'), KeyModifiers::empty()))
+        );
+    }
 }
