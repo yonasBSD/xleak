@@ -17,6 +17,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Changed
 - Help screen now includes configuration information
 
+### Fixed
+- Double keypress issue on Windows by filtering key release events (thanks [@clindholm](https://github.com/clindholm)! [#2](https://github.com/bgreenwell/xleak/issues/2))
+
 ## [0.1.0] - 2025-01-08
 
 ### Added

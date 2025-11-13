@@ -2,7 +2,7 @@ use crate::workbook::{CellValue, LazySheetData, SheetData, Workbook};
 use anyhow::{Context, Result};
 use arboard::Clipboard;
 use crossterm::{
-    event::{self, Event, KeyCode, KeyEvent},
+    event::{self, Event, KeyCode, KeyEvent, KeyEventKind},
     execute,
     terminal::{EnterAlternateScreen, LeaveAlternateScreen, disable_raw_mode, enable_raw_mode},
 };
@@ -997,7 +997,10 @@ impl TuiState {
 
     fn handle_event(&mut self, event: Event) {
         if let Event::Key(KeyEvent {
-            code, modifiers, ..
+            code,
+            modifiers,
+            kind: KeyEventKind::Press,
+            ..
         }) = event
         {
             // If help is showing, any key closes it
