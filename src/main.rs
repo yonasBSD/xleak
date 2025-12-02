@@ -103,25 +103,30 @@ fn main() -> Result<()> {
         wb.load_tables()?;
         let table_data = wb.table_by_name(table_name)?;
 
-        // Display or export table data
-        match cli.export.as_deref() {
-            Some("json") => {
-                export_table_json(&table_data)?;
+        // Handle export formats (non-interactive)
+        if let Some(format) = cli.export.as_deref() {
+            match format {
+                "json" => export_table_json(&table_data)?,
+                "csv" => export_table_csv(&table_data)?,
+                "text" => export_table_text(&table_data)?,
+                _ => anyhow::bail!("Unknown export format: {format}. Use: csv, json, or text"),
             }
-            Some("csv") => {
-                export_table_csv(&table_data)?;
-            }
-            Some("text") => {
-                export_table_text(&table_data)?;
-            }
-            Some(format) => {
-                anyhow::bail!("Unknown export format: {format}. Use: csv, json, or text");
-            }
-            None => {
-                // Default: display table in terminal (like sheets)
-                display_table_data(&table_data, cli.max_rows)?;
-            }
+            return Ok(());
         }
+
+        if cli.interactive {
+            anyhow::bail!(
+                "Interactive mode (-i) is not supported with --table.\n\
+                 \n\
+                 Options:\n\
+                 • View table in terminal: xleak file.xlsx --table \"{table_name}\"\n\
+                 • View full sheet in TUI: xleak file.xlsx --sheet \"{}\" -i",
+                table_data.sheet_name
+            );
+        }
+
+        // Default: display table in terminal
+        display_table_data(&table_data, cli.max_rows)?;
         return Ok(());
     }
 
