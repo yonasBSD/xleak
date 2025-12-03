@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.1.1] - 2025-12-03
+
 ### Added
 - Configuration file support via TOML at `~/.config/xleak/config.toml` (thanks [@izelnakri](https://github.com/izelnakri) for the suggestion! [#1](https://github.com/bgreenwell/xleak/issues/1))
 - Six built-in color themes: Default, Dracula, Solarized Dark/Light, GitHub Dark, Nord
