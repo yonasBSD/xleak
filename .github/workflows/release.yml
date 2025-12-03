@@ -347,19 +347,61 @@ jobs:
           pattern: artifacts-*
           path: bucket/
           merge-multiple: true
-      - name: Commit manifest files
+      - name: Generate and commit manifest
         run: |
           git config --global user.name "${GITHUB_USER}"
           git config --global user.email "${GITHUB_EMAIL}"
 
-          for release in $(echo "$PLAN" | jq --compact-output '.releases[] | select([.artifacts[] | endswith(".json")] | any)'); do
-            filename=$(echo "$release" | jq '.artifacts[] | select(endswith(".json") and (. | contains("xleak")))' --raw-output)
-            if [ -n "$filename" ]; then
-              name=$(basename "$filename" .json)
-              version=$(echo "$release" | jq .app_version --raw-output)
+          # Create bucket directory if it doesn't exist
+          mkdir -p bucket
 
-              git add "bucket/${filename}"
-              git commit -m "${name} ${version}" || echo "Nothing to commit for ${filename}"
+          for release in $(echo "$PLAN" | jq --compact-output '.releases[]'); do
+            app_name=$(echo "$release" | jq -r '.app_name')
+            version=$(echo "$release" | jq -r '.app_version')
+
+            # Find MSI file for x86_64-pc-windows-msvc
+            msi_file=$(echo "$release" | jq -r '.artifacts[] | select(contains("x86_64-pc-windows-msvc") and endswith(".msi"))')
+
+            if [ -n "$msi_file" ]; then
+              # Find corresponding SHA256 file
+              sha_file="${msi_file}.sha256"
+
+              if [ -f "bucket/${sha_file}" ]; then
+                sha256=$(cat "bucket/${sha_file}" | cut -d ' ' -f 1)
+                download_url="https://github.com/bgreenwell/xleak/releases/download/v${version}/${msi_file}"
+
+                # Generate Scoop manifest
+                cat > "bucket/${app_name}.json" <<EOF
+{
+  "version": "${version}",
+  "description": "A fast terminal Excel viewer with interactive TUI, search, formulas, and export capabilities",
+  "homepage": "https://github.com/bgreenwell/xleak",
+  "license": "MIT",
+  "architecture": {
+    "64bit": {
+      "url": "${download_url}",
+      "hash": "${sha256}"
+    }
+  },
+  "bin": "xleak.exe",
+  "checkver": {
+    "github": "https://github.com/bgreenwell/xleak"
+  },
+  "autoupdate": {
+    "architecture": {
+      "64bit": {
+        "url": "https://github.com/bgreenwell/xleak/releases/download/v\$version/xleak-x86_64-pc-windows-msvc.msi"
+      }
+    }
+  }
+}
+EOF
+
+                git add "bucket/${app_name}.json"
+                git commit -m "${app_name} ${version}" || echo "Nothing to commit for ${app_name}"
+              else
+                echo "Warning: SHA256 file not found: bucket/${sha_file}"
+              fi
             fi
           done
           git push
