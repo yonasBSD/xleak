@@ -211,11 +211,12 @@ fn display_table_data(table: &workbook::TableData, max_rows: usize) -> Result<()
     println!("║  xleak - Excel Table Viewer                     ║");
     println!("╚═════════════════════════════════════════════════╝");
     println!();
+    println!("Table: {} (from sheet: {})", table.name, table.sheet_name);
     println!(
-        "Table: {} (from sheet: {})",
-        table.name, table.sheet_name
+        "{} rows × {} columns",
+        table.rows.len(),
+        table.headers.len()
     );
-    println!("{} rows × {} columns", table.rows.len(), table.headers.len());
     println!();
 
     // Create prettytable

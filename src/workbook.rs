@@ -1,4 +1,4 @@
-use anyhow::{anyhow, Context, Result};
+use anyhow::{Context, Result, anyhow};
 use calamine::{Data, Range, Reader, Sheets, Table, open_workbook_auto};
 use chrono::{Duration, NaiveDate};
 use std::path::Path;
