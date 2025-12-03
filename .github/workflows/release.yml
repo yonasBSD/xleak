@@ -371,16 +371,16 @@ jobs:
                 download_url="https://github.com/bgreenwell/xleak/releases/download/v${version}/${msi_file}"
 
                 # Generate Scoop manifest
-                cat > "bucket/${app_name}.json" <<EOF
+                cat > "bucket/${app_name}.json" <<'MANIFEST'
 {
-  "version": "${version}",
+  "version": "'"${version}"'",
   "description": "A fast terminal Excel viewer with interactive TUI, search, formulas, and export capabilities",
   "homepage": "https://github.com/bgreenwell/xleak",
   "license": "MIT",
   "architecture": {
     "64bit": {
-      "url": "${download_url}",
-      "hash": "${sha256}"
+      "url": "'"${download_url}"'",
+      "hash": "'"${sha256}"'"
     }
   },
   "bin": "xleak.exe",
@@ -390,12 +390,12 @@ jobs:
   "autoupdate": {
     "architecture": {
       "64bit": {
-        "url": "https://github.com/bgreenwell/xleak/releases/download/v\$version/xleak-x86_64-pc-windows-msvc.msi"
+        "url": "https://github.com/bgreenwell/xleak/releases/download/v$version/xleak-x86_64-pc-windows-msvc.msi"
       }
     }
   }
 }
-EOF
+MANIFEST
 
                 git add "bucket/${app_name}.json"
                 git commit -m "${app_name} ${version}" || echo "Nothing to commit for ${app_name}"
