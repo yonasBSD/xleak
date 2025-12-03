@@ -60,3 +60,5 @@ makedepends = ["cargo"]
 [package.metadata.wix]
 upgrade-guid = "7336173b-1ee3-408e-af34-d930507b8941"
 path-guid = "67e1bb49-876f-4934-85e4-8faad4ada16f"
+license = false
+eula = false
