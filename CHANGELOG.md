@@ -7,7 +7,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Fixed
+- Date display off by one day - corrected Excel epoch from December 30 to December 31, 1899 (thanks [@Xuquansheng](https://github.com/Xuquansheng)! [#25](https://github.com/bgreenwell/xleak/issues/25))
+
+### Changed
+- Consolidated test fixtures from 6 files to 3 standardized files (test_comprehensive.xlsx, test_large.xlsx, test_tables.xlsx)
+
 ## [0.2.0] - 2025-12-03
+
+### Changed
+- Migrated to cargo-dist for automated multi-platform releases
+- Release process now supports shell/PowerShell installers and Homebrew tap updates
 
 ## [0.1.1] - 2025-12-03
 

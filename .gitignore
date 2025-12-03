@@ -12,6 +12,9 @@
 *.ods
 *.csv
 
+# Deprecated test files
+tests/fixtures/deprecated/
+
 # macOS
 .DS_Store
 .AppleDouble

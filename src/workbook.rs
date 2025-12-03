@@ -247,8 +247,12 @@ impl CellValue {
             CellValue::Bool(b) => b.to_string(),
             CellValue::Error(e) => format!("#{e}"),
             CellValue::DateTime(dt) => {
-                let epoch = NaiveDate::from_ymd_opt(1899, 12, 30).unwrap();
-                let date = epoch + Duration::days(dt.floor() as i64);
+                let days = dt.floor() as i64;
+                // Excel epoch: December 31, 1899 (Excel serial 0)
+                let epoch = NaiveDate::from_ymd_opt(1899, 12, 31).unwrap();
+                // Adjust for Excel's 1900 leap year bug (day 60 = Feb 29, 1900 which didn't exist)
+                let adjusted_days = if days > 60 { days - 1 } else { days };
+                let date = epoch + Duration::days(adjusted_days);
                 let time_fraction = dt.fract();
                 let total_seconds = (time_fraction * 86400.0).round() as i64;
                 let hours = total_seconds / 3600;
@@ -357,13 +361,13 @@ impl std::fmt::Display for CellValue {
             }
             CellValue::Error(e) => write!(f, "ERROR: {e}"),
             CellValue::DateTime(d) => {
-                // Excel dates are days since December 30, 1899 (day 0)
+                // Excel dates are days since December 31, 1899 (serial 0)
                 // Excel has a leap year bug where 1900 is incorrectly treated as a leap year
                 // Days > 60 need adjustment for this bug
                 let days = d.floor() as i64;
 
-                // Excel epoch: December 30, 1899
-                let excel_epoch = NaiveDate::from_ymd_opt(1899, 12, 30).unwrap();
+                // Excel epoch: December 31, 1899 (Excel serial 0)
+                let excel_epoch = NaiveDate::from_ymd_opt(1899, 12, 31).unwrap();
 
                 // Adjust for Excel's 1900 leap year bug (day 60 = Feb 29, 1900 which didn't exist)
                 let adjusted_days = if days > 60 { days - 1 } else { days };

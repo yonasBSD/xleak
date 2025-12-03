@@ -1,7 +1,8 @@
 #!/usr/bin/env python3
 """
-Generate a large Excel file for testing xleak's lazy loading
-Run: python3 generate_large_test_data.py
+Generate large Excel file for testing xleak's lazy loading performance.
+Run: python3 generate_test_large.py [num_rows]
+Default: 10,000 rows
 """
 
 try:
@@ -13,7 +14,8 @@ except ImportError:
     exit(1)
 
 def create_large_file(num_rows=10000):
-    print(f"📊 Generating large test file with {num_rows:,} rows...")
+    """Create large test file with specified number of rows."""
+    print(f"📊 Generating test_large.xlsx with {num_rows:,} rows...")
     start_time = time.time()
 
     wb = Workbook()
@@ -22,7 +24,7 @@ def create_large_file(num_rows=10000):
 
     # Headers
     headers = ["ID", "Name", "Email", "Age", "City", "Country", "Salary",
-               "Department", "Status", "Join Date", "Score", "Rating"]
+               "Department", "Status", "JoinDate", "Score", "Rating"]
     ws.append(headers)
 
     # Sample data pools
@@ -49,29 +51,27 @@ def create_large_file(num_rows=10000):
             random.randint(40000, 150000),  # Salary
             random.choice(departments),  # Department
             random.choice(statuses),  # Status
-            f"2020-{random.randint(1,12):02d}-{random.randint(1,28):02d}",  # Join Date
+            f"2020-{random.randint(1,12):02d}-{random.randint(1,28):02d}",  # JoinDate
             round(random.uniform(60, 100), 1),  # Score
             round(random.uniform(1, 5), 1),  # Rating
         ]
         ws.append(row_data)
 
-    # Create a smaller sheet for comparison
+    # Create a smaller sheet for comparison and multi-sheet testing
     ws2 = wb.create_sheet("SmallData")
     ws2.append(["Product", "Price", "Stock"])
     for i in range(50):
         ws2.append([f"Product {i+1}", round(random.uniform(10, 500), 2), random.randint(0, 1000)])
 
-    filename = f"large_test_{num_rows}.xlsx"
+    filename = "test_large.xlsx"
     print(f"💾 Saving {filename}...")
     wb.save(filename)
 
     elapsed = time.time() - start_time
-    print(f"✅ Created {filename}")
+    print(f"\n✓ Created {filename}")
     print(f"   - LargeData sheet: {num_rows:,} rows × {len(headers)} columns")
     print(f"   - SmallData sheet: 50 rows × 3 columns")
     print(f"   - Generation time: {elapsed:.1f} seconds")
-    print()
-    print("⚠️  IMPORTANT: Open the file in Excel and save it to cache formula results.")
     print()
     print("Test with:")
     print(f"  ./target/release/xleak {filename} -i")
@@ -86,8 +86,8 @@ if __name__ == "__main__":
         try:
             num_rows = int(sys.argv[1])
         except ValueError:
-            print("Usage: python3 generate_large_test_data.py [num_rows]")
-            print("Example: python3 generate_large_test_data.py 50000")
+            print("Usage: python3 generate_test_large.py [num_rows]")
+            print("Example: python3 generate_test_large.py 50000")
             sys.exit(1)
 
     create_large_file(num_rows)
