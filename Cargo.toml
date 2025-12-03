@@ -1,6 +1,6 @@
 [package]
 name = "xleak"
-version = "0.1.1"
+version = "0.1.0"
 edition = "2024"
 authors = ["Brandon Greenwell <greenwell.brandon@gmail.com>"]
 description = "A fast terminal Excel viewer with interactive TUI, search, formulas, and export capabilities"
@@ -50,7 +50,6 @@ pre-release-replacements = [
 ]
 pre-release-commit-message = "chore: release {{version}}"
 tag-message = "Release {{version}}"
-tag-prefix = "v"
 
 # cargo-aur configuration for Arch Linux
 [package.metadata.aur]
