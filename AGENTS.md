@@ -49,13 +49,13 @@ cargo build --release
 ### Running
 ```bash
 # Run without building binary
-cargo run -- test_data.xlsx
+cargo run -- tests/fixtures/test_comprehensive.xlsx
 
 # Run with arguments
-cargo run --release -- test_data.xlsx --sheet "Sales" -n 20
+cargo run --release -- tests/fixtures/test_comprehensive.xlsx --sheet "DataTypes" -n 20
 
 # Run compiled binary
-./target/release/xleak test_data.xlsx
+./target/release/xleak tests/fixtures/test_comprehensive.xlsx
 ```
 
 ### Installing
@@ -98,9 +98,17 @@ Test coverage includes:
 
 ### Creating Test Data
 ```bash
-# Requires Python 3 and openpyxl
-pip install openpyxl
-python3 generate_test_data.py
+# Activate Python virtual environment
+source .venv/bin/activate
+
+# Generate all test fixtures
+cd tests/fixtures
+python generate_all_tests.py
+
+# Generate individual fixtures if needed
+python generate_test_comprehensive.py
+python generate_test_large.py
+python generate_test_tables.py
 ```
 
 ## Code Style Guidelines
@@ -241,7 +249,7 @@ Provide user-friendly error messages:
 - [ ] Code compiles: `cargo build --release`
 - [ ] No clippy warnings: `cargo clippy`
 - [ ] Code is formatted: `cargo fmt`
-- [ ] Tested with real Excel files (not just test_data.xlsx)
+- [ ] Tested with test fixtures and real Excel files
 - [ ] Updated README.md if adding user-facing features
 - [ ] Updated AGENTS.md if changing architecture/dependencies
 
@@ -249,7 +257,7 @@ Provide user-friendly error messages:
 
 1. **Make changes** to source files
 2. **Quick check:** `cargo check` (fast, no binary)
-3. **Test locally:** `cargo run -- test_data.xlsx`
+3. **Test locally:** `cargo run -- tests/fixtures/test_comprehensive.xlsx -i`
 4. **Run linter:** `cargo clippy`
 5. **Format:** `cargo fmt`
 6. **Full test:** `cargo build --release` and test with real files
@@ -270,8 +278,8 @@ Provide user-friendly error messages:
 
 ### Fixing a display issue
 1. Locate issue in `src/display.rs` (likely `display_table()`)
-2. Test changes with: `cargo run -- test_data.xlsx`
-3. Verify with different data types (numbers, strings, booleans, errors)
+2. Test changes with: `cargo run -- tests/fixtures/test_comprehensive.xlsx -i`
+3. Verify with different data types using the DataTypes sheet
 
 ### Handling a new cell type
 1. Add variant to `CellValue` enum in `src/workbook.rs`
@@ -286,17 +294,17 @@ Provide user-friendly error messages:
 cargo fmt && cargo clippy && cargo build --release
 
 # Quick iteration
-cargo check && cargo run -- test_data.xlsx
+cargo check && cargo run -- tests/fixtures/test_comprehensive.xlsx -i
 
 # View specific sheet
-cargo run -- test_data.xlsx --sheet Employees
+cargo run -- tests/fixtures/test_tables.xlsx --sheet EmployeesTable
 
 # Test exports
-cargo run -- test_data.xlsx --export csv > test.csv
-cargo run -- test_data.xlsx --export json > test.json
+cargo run -- tests/fixtures/test_comprehensive.xlsx --export csv > test.csv
+cargo run -- tests/fixtures/test_comprehensive.xlsx --export json > test.json
 
 # Performance check (release mode is crucial)
-time ./target/release/xleak large_file.xlsx
+time ./target/release/xleak tests/fixtures/test_large.xlsx
 
 # Install globally after changes
 cargo install --path .
@@ -446,6 +454,6 @@ If implementing features:
 2. Review existing code patterns before adding new patterns
 3. Keep changes minimal and focused
 4. Prefer editing existing files over creating new ones
-5. Test with multiple file formats (.xlsx, .xls, .ods)
+5. Test with fixtures in tests/fixtures/ covering multiple formats (.xlsx, .xls, .ods)
 
 For TUI implementation (future), reference ratatui tutorial: https://ratatui.rs/tutorial/
