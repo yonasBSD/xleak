@@ -251,7 +251,7 @@ fn parse_key_string(s: &str) -> Option<(KeyCode, KeyModifiers)> {
 fn get_default_keybinding(action: &str) -> Option<(KeyCode, KeyModifiers)> {
     let binding = match action {
         "quit" => ("q", KeyModifiers::empty()),
-        "help" => ("?", KeyModifiers::empty()),
+        "help" => ("?", KeyModifiers::SHIFT),
         "theme_toggle" => ("t", KeyModifiers::empty()),
         "search" => ("/", KeyModifiers::empty()),
         "next_match" => ("n", KeyModifiers::empty()),
@@ -291,7 +291,7 @@ fn get_vim_keybinding(action: &str) -> Option<(KeyCode, KeyModifiers)> {
         "jump_to_top" => ("g", KeyModifiers::empty()),
         "jump_to_bottom" => ("G", KeyModifiers::SHIFT),
         "jump_to_row_start" => ("0", KeyModifiers::empty()),
-        "jump_to_row_end" => ("$", KeyModifiers::empty()),
+        "jump_to_row_end" => ("$", KeyModifiers::SHIFT),
         // VIM-style actions
         "quit" => ("q", KeyModifiers::empty()),
         "copy_cell" => ("y", KeyModifiers::empty()),
@@ -447,7 +447,7 @@ search = "?"
         // Non-overridden should use profile default
         assert_eq!(
             config.get_keybinding("help"),
-            Some((KeyCode::Char('?'), KeyModifiers::empty()))
+            Some((KeyCode::Char('?'), KeyModifiers::SHIFT))
         );
     }
 
@@ -567,7 +567,7 @@ page_up = "Ctrl+b"
         // Non-VIM actions should fall back to default profile
         assert_eq!(
             config.get_keybinding("help"),
-            Some((KeyCode::Char('?'), KeyModifiers::empty()))
+            Some((KeyCode::Char('?'), KeyModifiers::SHIFT))
         );
         assert_eq!(
             config.get_keybinding("theme_toggle"),
