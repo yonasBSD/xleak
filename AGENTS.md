@@ -115,5 +115,3 @@ If implementing features:
 3. Keep changes minimal and focused
 4. Prefer editing existing files over creating new ones
 5. Test with fixtures in tests/fixtures/ covering multiple formats (.xlsx, .xls, .ods)
-
-For TUI implementation (future), reference ratatui tutorial: https://ratatui.rs/tutorial/
