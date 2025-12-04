@@ -8,10 +8,22 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Fixed
+- Time precision issue causing seconds to be off by 1 due to floating point truncation (thanks [@Xuquansheng](https://github.com/Xuquansheng)! [#25](https://github.com/bgreenwell/xleak/issues/25))
+
+### Changed
+- Enhanced installation documentation with Scoop (Windows), AUR (Arch Linux), shell/PowerShell installers, and MSI details
+- Condensed AGENTS.md from 460 to 117 lines for better maintainability
+
+## [0.2.3] - 2025-12-03
+
+### Fixed
 - Date display off by one day - corrected Excel epoch from December 30 to December 31, 1899 (thanks [@Xuquansheng](https://github.com/Xuquansheng)! [#25](https://github.com/bgreenwell/xleak/issues/25))
 
 ### Changed
 - Consolidated test fixtures from 6 files to 3 standardized files (test_comprehensive.xlsx, test_large.xlsx, test_tables.xlsx)
+
+### Added
+- Release checklist and GitHub issue templates (Bug Report, Feature Request, Release)
 
 ## [0.2.0] - 2025-12-03
 
