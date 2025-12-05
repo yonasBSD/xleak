@@ -14,7 +14,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - VIM mode `$` keybinding now correctly expects SHIFT modifier on Windows
 
 ### Added
-- Automated crates.io publishing via cargo-dist for all future releases
+- Automated crates.io publishing via custom GitHub Action for all future releases
 
 ## [0.2.4] - 2025-12-04
 

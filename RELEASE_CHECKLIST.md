@@ -7,7 +7,10 @@ Use this checklist when preparing a new release of xleak. You can also create a 
 - [ ] All tests passing: `cargo test`
 - [ ] No clippy warnings: `cargo clippy`
 - [ ] Code is formatted: `cargo fmt --check`
-- [ ] CHANGELOG.md updated with new version changes
+- [ ] CHANGELOG.md updated:
+  - [ ] Move items from `[Unreleased]` to new `[X.Y.Z] - YYYY-MM-DD` section
+  - [ ] Keep `[Unreleased]` section empty for future changes
+  - [ ] Verify changelog entries are accurate and complete
 - [ ] Version bumped in `Cargo.toml`
 - [ ] Test binary works: `cargo run --release -- test_data.xlsx`
 
