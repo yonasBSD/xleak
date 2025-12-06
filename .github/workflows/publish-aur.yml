@@ -95,6 +95,10 @@ jobs:
             chown -R builder:builder .
             su builder -c 'makepkg --printsrcinfo' > .SRCINFO
 
+      - name: Fix permissions after Docker
+        run: |
+          sudo chown -R $USER:$USER ${{ github.workspace }}
+
       - name: Setup SSH for AUR
         uses: webfactory/ssh-agent@v0.9.0
         with:
