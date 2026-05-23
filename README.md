@@ -65,6 +65,11 @@ yay -S xleak-bin
 paru -S xleak-bin
 ```
 
+**NetBSD:**
+```bash
+pkgin install xleak
+```
+
 **Cargo (all platforms):**
 ```bash
 cargo install xleak
