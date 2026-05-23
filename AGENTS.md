@@ -2,7 +2,7 @@
 
 Excel terminal viewer written in Rust with TUI, search, formulas, and export capabilities.
 
-**Tech Stack:** Rust 2024, calamine, clap, ratatui + crossterm, anyhow, prettytable-rs, arboard, chrono
+**Tech Stack:** Rust 2024, calamine, clap, ratatui + crossterm, anyhow, comfy-table, arboard, chrono
 
 **Formats:** `.xlsx`, `.xls`, `.xlsm`, `.xlsb`, `.ods`
 
@@ -19,8 +19,7 @@ cargo run -- tests/fixtures/test_comprehensive.xlsx -i
 
 **Generate test data:**
 ```bash
-source .venv/bin/activate
-cd tests/fixtures && python generate_all_tests.py
+cd tests/fixtures && uv run python generate_all_tests.py
 ```
 
 ## Code Style
@@ -41,7 +40,7 @@ cd tests/fixtures && python generate_all_tests.py
 **Key dependencies:**
 - `calamine` - Excel parsing, `clap` - CLI framework
 - `ratatui` + `crossterm` - TUI, `anyhow` - Error handling
-- `prettytable-rs` - Non-interactive display, `arboard` - Clipboard
+- `comfy-table` - Non-interactive display, `arboard` - Clipboard
 
 **Implemented features:** Interactive TUI, search, formulas, clipboard, lazy loading, multi-sheet nav, cell jump, horizontal scrolling
 
@@ -73,6 +72,9 @@ Use conventional commits: `type: description` where type is `feat`, `fix`, `docs
 - [ ] Code compiles, no clippy warnings, formatted
 - [ ] Tested with fixtures and real Excel files
 - [ ] Updated README.md (if user-facing) or AGENTS.md (if architecture changes)
+- [ ] Added a concise entry to CHANGELOG.md under `[Unreleased]` — one line per change, no prose
+
+**Changelog style:** Keep entries short and scannable. One line per item. Omit "in order to", "now", filler words. Bad: `"The formula cells are now detected and a warning message is shown to inform users that..."`. Good: `"Warn when formula cells are blank due to uncached xlsx values"`.
 
 ## Common Patterns (For AI Agents)
 
