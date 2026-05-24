@@ -450,11 +450,7 @@ impl ProgressInfo {
     }
 
     fn percentage(&self) -> usize {
-        if self.total == 0 {
-            100
-        } else {
-            (self.current * 100) / self.total
-        }
+        (self.current * 100).checked_div(self.total).unwrap_or(100)
     }
 
     fn format(&self) -> String {
